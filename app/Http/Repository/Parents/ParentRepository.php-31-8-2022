@@ -1,0 +1,57 @@
+<?php
+
+namespace App\Http\Repository\Parents;
+use App\Contracts\Parents\ParentRepositoryInterface;
+
+// declare Entities
+use App\Models\parents_crs;
+use App\Models\change_request;
+
+
+class ParentRepository implements ParentRepositoryInterface
+{
+
+    
+    public function getAll()
+    {
+        return parents_crs::all();
+    }
+
+    public function create($request)
+    {
+       
+      $change_request= change_request::find($request['parent_id']);
+     
+      $data['application_name']=$change_request->application_name;
+      $data['parent_id']=$request['parent_id'];
+      $data['active']="1";
+        
+        return parents_crs::create($data);
+    }
+
+    public function delete($id)
+    {
+        return parents_crs::destroy($id);
+    }
+
+    public function update($request, $id)
+    {
+        return parents_crs::where('id', $id)->update($request);
+    }
+
+    public function find($id)
+    {
+        return parents_crs::find($id);
+    }
+public function updateactive($active,$id){
+		if($active){
+		return 	$this->update(['active'=>'0'],$id);
+		} else{
+			
+					return 	$this->update(['active'=>'1'],$id);
+
+		}
+		
+	}
+
+}

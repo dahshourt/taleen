@@ -1,0 +1,321 @@
+/* Home Page Custom Styles */
+:root {
+    --te-purple: #5b2d90;
+    --te-purple-dark: #4a2375;
+    --te-purple-light: #7a46b5;
+    --te-text-gray: #7e8299;
+    --te-text-dark: #181c32;
+    --te-bg-light: #f3f6f9;
+    --te-card-shadow: 0 0 20px 0 rgba(76, 87, 125, 0.02);
+    --te-card-hover-shadow: 0 0 40px 0 rgba(76, 87, 125, 0.1);
+}
+
+.dashboard-container {
+    padding: 30px;
+    background-color: #ffffff;
+    /* Explicitly set white background */
+    min-height: 100vh;
+}
+
+/* Force override if specific id is used for layout background */
+#kt_content {
+    background-color: #ffffff !important;
+}
+
+/* Greeting Section */
+.greeting-section {
+    margin-bottom: 25px;
+}
+
+.greeting-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--te-text-dark);
+    margin-bottom: 0.25rem;
+}
+
+.last-login-text {
+    color: #B5B5C3;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+}
+
+.last-login-icon {
+    margin-right: 6px;
+    font-size: 0.9rem;
+    color: #B5B5C3;
+}
+
+/* Hero Banner - Create CR */
+.hero-banner {
+    background: #5b2d90;
+    /* Fallback */
+    background: linear-gradient(135deg, #5b2d90 0%, #4a2375 100%);
+    border-radius: 12px;
+    padding: 0;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 30px;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 10px 30px 0 rgba(91, 45, 144, 0.2);
+}
+
+.hero-content {
+    padding: 40px;
+    position: relative;
+    z-index: 2;
+    max-width: 55%;
+}
+
+.hero-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.hero-subtitle {
+    font-size: 1rem;
+    opacity: 0.8;
+    margin-bottom: 25px;
+    font-weight: 400;
+}
+
+.btn-hero-action {
+    background-color: white;
+    color: var(--te-purple);
+    font-weight: 600;
+    padding: 10px 24px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    animation: pulse-purple 2s infinite;
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+}
+
+.btn-hero-action:hover {
+    background-color: #f8f9fa;
+    color: var(--te-purple-dark);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    animation: none;
+    /* Stop animation on hover */
+    transform: translateY(-2px);
+}
+
+@keyframes pulse-purple {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+    }
+
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+    }
+
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+    }
+}
+
+/* Wave/Curve Overlay */
+.hero-banner::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 70%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 60%);
+    transform: rotate(-15deg);
+    border-radius: 40%;
+    z-index: 1;
+}
+
+.hero-banner::after {
+    display: none;
+}
+
+.hero-illustration {
+    position: absolute;
+    right: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    max-width: 40%;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.hero-illustration i {
+    font-size: 8rem;
+    color: rgba(255, 255, 255, 0.15);
+}
+
+/* Action Cards Grid */
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+}
+
+.action-card {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    border: none;
+    box-shadow: var(--te-card-shadow);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    text-decoration: none !important;
+    /* Ensure no underline on the card itself */
+    color: inherit;
+    cursor: pointer;
+}
+
+.action-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--te-card-hover-shadow);
+    color: inherit;
+}
+
+/* Top border accent on hover */
+.action-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 4px;
+    background: var(--te-purple);
+    transition: width 0.3s ease;
+}
+
+.action-card:hover::before {
+    width: 100%;
+}
+
+.card-icon-wrapper {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    background-color: #f3f0ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 25px;
+    transition: all 0.3s ease;
+}
+
+.action-card:hover .card-icon-wrapper {
+    background-color: var(--te-purple);
+    transform: rotateY(180deg);
+}
+
+.card-icon {
+    font-size: 1.75rem;
+    color: var(--te-purple);
+    transition: color 0.3s ease;
+}
+
+.action-card:hover .card-icon-wrapper i {
+    transform: rotateY(-180deg);
+    /* Counteract parent rotation */
+}
+
+.action-card:hover .card-icon {
+    color: white;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--te-text-dark);
+    margin-bottom: 12px;
+}
+
+.card-description {
+    color: var(--te-text-gray);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 25px;
+    flex-grow: 1;
+}
+
+.card-action-link {
+    color: var(--te-purple);
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    padding: 8px 0;
+}
+
+.card-action-link:hover {
+    color: var(--te-purple-dark);
+    text-decoration: none;
+}
+
+.card-action-link i {
+    font-size: 0.8rem;
+    margin-left: 8px;
+    transition: transform 0.2s ease;
+}
+
+.card-action-link:hover i {
+    transform: translateX(4px);
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .actions-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .greeting-section {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .last-login-text {
+        margin-top: 10px;
+    }
+
+    .actions-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-banner {
+        flex-direction: column;
+        text-align: center;
+        padding: 30px;
+    }
+
+    .hero-content {
+        max-width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .hero-illustration {
+        position: relative;
+        right: auto;
+        top: auto;
+        transform: none;
+        margin-top: 10px;
+    }
+}

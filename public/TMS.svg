@@ -1,0 +1,14 @@
+<svg width="300" height="100" viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#5b2d90;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4a2375;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Stylized T shape or Icon -->
+  <circle cx="50" cy="50" r="40" stroke="url(#grad)" stroke-width="4" fill="none" opacity="0.8"/>
+  <path d="M35 50 L50 65 L70 35" stroke="#5b2d90" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Text -->
+  <text x="110" y="72" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="60" font-weight="800" fill="#333333" letter-spacing="2">TMS</text>
+</svg>

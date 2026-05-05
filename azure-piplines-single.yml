@@ -1,0 +1,322 @@
+# Manual trigger only - for individual PR/commit file retrieval
+trigger: none
+
+# Allow manual runs with flexible options 
+parameters:
+- name: retrievalMode
+  displayName: 'What do you want to retrieve?'
+  type: string
+  default: 'single-commit'
+  values:
+  - single-commit
+  - pull-request
+  - commit-range
+
+- name: commitHash
+  displayName: 'Commit Hash (for single commit)'
+  type: string
+  default: ' '
+
+- name: pullRequestId
+  displayName: 'Pull Request ID (e.g., 123)'
+  type: string
+  default: ' '
+
+- name: startCommit
+  displayName: 'Start Commit (for range)'
+  type: string
+  default: ' '
+
+- name: endCommit
+  displayName: 'End Commit (for range - leave empty for HEAD)'
+  type: string
+  default: ' '
+
+- name: targetBranch
+  displayName: 'Target Branch (for PR comparison)'
+  type: string
+  default: 'DevMaster'
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+# Checkout with full history
+- checkout: self
+  fetchDepth: 0
+  displayName: 'Checkout repository'
+
+# Retrieve changed files based on mode
+- script: |
+    echo "================================================"
+    echo " File Retrieval Mode: ${{ parameters.retrievalMode }}"
+    echo "================================================"
+    echo ""
+    
+    MODE="${{ parameters.retrievalMode }}"
+    
+    case $MODE in
+      "single-commit")
+        echo " Mode: Single Commit"
+        COMMIT="${{ parameters.commitHash }}"
+        
+        if [ -z "$COMMIT" ]; then
+          echo " Error: Commit hash is required for single-commit mode"
+          exit 1
+        fi
+        
+        echo "Commit: $COMMIT"
+        git log -1 --oneline $COMMIT
+        echo ""
+        
+        # Get files changed in THIS commit only
+        git diff-tree --no-commit-id --name-only --diff-filter=ACMR -r $COMMIT > changed_files.txt
+        
+        echo "Files changed in commit $COMMIT:" > commit_info.txt
+        echo "Commit: $COMMIT" >> commit_info.txt
+        git log -1 --format="Author: %an <%ae>%nDate: %ad%nMessage: %s" $COMMIT >> commit_info.txt
+        ;;
+        
+      "pull-request")
+        echo " Mode: Pull Request"
+        PR_ID="${{ parameters.pullRequestId }}"
+        TARGET_BRANCH="${{ parameters.targetBranch }}"
+        
+        if [ -z "$PR_ID" ]; then
+          echo " Error: Pull Request ID is required"
+          exit 1
+        fi
+        
+        echo "Pull Request: #$PR_ID"
+        echo "Target Branch: $TARGET_BRANCH"
+        echo ""
+        
+        # Find PR merge commit or use PR branch
+        # Option 1: If PR is merged, find merge commit
+        MERGE_COMMIT=$(git log --merges --all --grep="Merged PR $PR_ID" -1 --format="%H" 2>/dev/null)
+        
+        if [ -n "$MERGE_COMMIT" ]; then
+          echo "Found merged PR commit: $MERGE_COMMIT"
+          git log -1 --oneline $MERGE_COMMIT
+          
+          # Get files from the merge
+          git diff-tree --no-commit-id --name-only --diff-filter=ACMR -r $MERGE_COMMIT > changed_files.txt
+        else
+          # Option 2: PR not merged yet - try to find PR branch
+          echo "PR merge commit not found. Trying to find PR branch..."
+          
+          # Try common PR branch patterns
+          PR_BRANCH=$(git branch -r | grep -E "pull/$PR_ID|pr/$PR_ID|PR$PR_ID" | head -1 | xargs)
+          
+          if [ -z "$PR_BRANCH" ]; then
+            echo "Error: Cannot find PR #$PR_ID"
+            echo "Please use 'commit-range' mode with the PR's commits instead"
+            exit 1
+          fi
+          
+          echo "Found PR branch: $PR_BRANCH"
+          
+          # Compare PR branch with target
+          git diff --name-only --diff-filter=ACMR origin/$TARGET_BRANCH...$PR_BRANCH > changed_files.txt
+        fi
+        
+        echo "Pull Request: #$PR_ID" > commit_info.txt
+        echo "Target Branch: $TARGET_BRANCH" >> commit_info.txt
+        ;;
+        
+      "commit-range")
+        echo " Mode: Commit Range"
+        START="${{ parameters.startCommit }}"
+        END="${{ parameters.endCommit }}"
+        
+        if [ -z "$START" ]; then
+          echo " Error: Start commit is required for commit-range mode"
+          exit 1
+        fi
+        
+        if [ -z "$END" ]; then
+          END="HEAD"
+        fi
+        
+        echo "Range: $START → $END"
+        echo ""
+        
+        # Get commits in range
+        echo "Commits in range:"
+        git log --oneline $START..$END
+        echo ""
+        
+        # Get all changed files in range
+        git diff --name-only --diff-filter=ACMR $START $END > changed_files.txt
+        
+        echo "Commit range: $START → $END" > commit_info.txt
+        echo "" >> commit_info.txt
+        echo "Commits included:" >> commit_info.txt
+        git log --oneline $START..$END >> commit_info.txt
+        ;;
+        
+      *)
+        echo "Error: Invalid mode"
+        exit 1
+        ;;
+    esac
+    
+    # Count and display files
+    FILE_COUNT=$(wc -l < changed_files.txt)
+    echo ""
+    echo "================================================"
+    echo "Found $FILE_COUNT changed file(s):"
+    echo "================================================"
+    cat changed_files.txt
+    echo "================================================"
+    echo ""
+    echo "Total files: $FILE_COUNT" >> commit_info.txt
+    
+    if [ ! -s changed_files.txt ]; then
+      echo "No files changed!"
+      exit 0
+    fi
+  displayName: 'Retrieve changed files'
+
+# Copy changed files to deploy folder
+- script: |
+    if [ ! -f changed_files.txt ] || [ ! -s changed_files.txt ]; then
+      echo "No files to copy, skipping..."
+      exit 0
+    fi
+    
+    echo "Preparing files for download..."
+    mkdir -p deploy
+    
+    SUCCESS_COUNT=0
+    FAIL_COUNT=0
+    
+    while IFS= read -r file; do
+      if [ -f "$file" ]; then
+        target_dir="deploy/$(dirname "$file")"
+        mkdir -p "$target_dir"
+        cp -v "$file" "deploy/$file"
+        echo "$file"
+        SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+      else
+        echo "File not found: $file"
+        FAIL_COUNT=$((FAIL_COUNT + 1))
+      fi
+    done < changed_files.txt
+    
+    # Copy info file
+    cp commit_info.txt deploy/
+    
+    echo ""
+    echo "Copy Summary:"
+    echo "Success: $SUCCESS_COUNT files"
+    if [ $FAIL_COUNT -gt 0 ]; then
+      echo "Failed: $FAIL_COUNT files"
+    fi
+  displayName: 'Prepare files'
+
+# Create manifest
+- script: |
+    if [ -d "deploy" ]; then
+      echo "Creating manifest..."
+      
+      MODE="${{ parameters.retrievalMode }}"
+      
+      echo "# File Package Manifest" > deploy/MANIFEST.md
+      echo "" >> deploy/MANIFEST.md
+      echo "**Generated:** $(date)" >> deploy/MANIFEST.md
+      echo "**Retrieval Mode:** $MODE" >> deploy/MANIFEST.md
+      echo "" >> deploy/MANIFEST.md
+      
+      case $MODE in
+        "single-commit")
+          echo "**Commit:** ${{ parameters.commitHash }}" >> deploy/MANIFEST.md
+          ;;
+        "pull-request")
+          echo "**Pull Request:** #${{ parameters.pullRequestId }}" >> deploy/MANIFEST.md
+          echo "**Target Branch:** ${{ parameters.targetBranch }}" >> deploy/MANIFEST.md
+          ;;
+        "commit-range")
+          echo "**Start Commit:** ${{ parameters.startCommit }}" >> deploy/MANIFEST.md
+          END="${{ parameters.endCommit }}"
+          if [ -z "$END" ]; then END="HEAD"; fi
+          echo "**End Commit:** $END" >> deploy/MANIFEST.md
+          ;;
+      esac
+      
+      echo "" >> deploy/MANIFEST.md
+      cat commit_info.txt >> deploy/MANIFEST.md
+      echo "" >> deploy/MANIFEST.md
+      echo "## Files Included:" >> deploy/MANIFEST.md
+      echo "" >> deploy/MANIFEST.md
+      
+      while IFS= read -r file; do
+        echo "- \`$file\`" >> deploy/MANIFEST.md
+      done < changed_files.txt
+      
+      echo "Manifest created"
+    fi
+  displayName: 'Create manifest'
+  condition: succeeded()
+
+# Create ZIP with custom name
+- script: |
+    MODE="${{ parameters.retrievalMode }}"
+    
+    case $MODE in
+      "single-commit")
+        COMMIT_SHORT=$(echo "${{ parameters.commitHash }}" | cut -c1-7)
+        ZIP_NAME="commit-${COMMIT_SHORT}"
+        ;;
+      "pull-request")
+        ZIP_NAME="pr-${{ parameters.pullRequestId }}"
+        ;;
+      "commit-range")
+        START_SHORT=$(echo "${{ parameters.startCommit }}" | cut -c1-7)
+        ZIP_NAME="range-${START_SHORT}"
+        ;;
+      *)
+        ZIP_NAME="files"
+        ;;
+    esac
+    
+    echo "##vso[task.setvariable variable=zipName]$ZIP_NAME"
+    echo "Package name: ${ZIP_NAME}.zip"
+  displayName: 'Generate package name'
+
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: 'deploy'
+    includeRootFolder: false
+    archiveFile: '$(Build.ArtifactStagingDirectory)/$(zipName)_$(Build.BuildId).zip'
+    replaceExistingArchive: true
+  displayName: 'Create ZIP package'
+  condition: succeeded()
+
+# Publish artifact
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)/$(zipName)_$(Build.BuildId).zip'
+    ArtifactName: '$(zipName)-package'
+    publishLocation: 'Container'
+  displayName: 'Publish package'
+  condition: succeeded()
+
+# Summary
+- script: |
+    echo ""
+    echo "╔═══════════════════════════════════════════╗"
+    echo "║        Package Ready for Download!        ║"
+    echo "╚═══════════════════════════════════════════╝"
+    echo ""
+    echo "Package: $(zipName)_$(Build.BuildId).zip"
+    echo "Download from pipeline artifacts"
+    echo ""
+    
+    if [ -f changed_files.txt ]; then
+      FILE_COUNT=$(wc -l < changed_files.txt)
+      echo "Total files: $FILE_COUNT"
+    fi
+    echo ""
+  displayName: 'Summary'
+  condition: succeeded()

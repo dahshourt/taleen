@@ -1,0 +1,181 @@
+<?php
+
+namespace App\Http\Repository\CustomField;
+use App\Contracts\CustomField\CustomFieldGroupTypeRepositoryInterface;
+ 
+// declare Entities
+use App\Models\CustomFieldGroup;
+use App\Models\CustomField;
+use App\Models\ValidationType;
+
+
+class CustomFieldGroupTypeRepository implements CustomFieldGroupTypeRepositoryInterface
+{
+    
+    public function getValidations()
+    {
+        return ValidationType::all();
+    }
+    
+    public function getAll()
+    {
+        return CustomFieldGroup::all();
+    }
+
+    public function getAllByColumnAndValue($column,$value)
+    {
+        return CustomFieldGroup::where($column,$value)->get();
+    }
+
+    public function getAllCustomFieldsWithSelected($column,$value)
+    {
+        $result = CustomField::with(['custom_field_group' => function($q) use($column,$value) {
+                $q->where($column,$value); 
+            }])->get();
+        return $result;    
+        //return CustomField::with('custom_field_group')->get();
+    }
+    
+    public function AllCustomFieldsWithSelectedWithFormType($column,$value,$form_type)
+    {
+        $result = CustomField::with(['custom_field_group' => function($q) use($column,$value,$form_type) {
+                $q->where($column,$value)->where('form_type',$form_type); 
+            }])->get();
+        return $result;    
+        //return CustomField::with('custom_field_group')->get();
+    }
+
+    public function create($request)
+    {
+        return CustomFieldGroup::create($request);
+    }
+
+    public function delete($id)
+    {
+        return CustomFieldGroup::destroy($id);
+    }
+
+    public function update($request, $id)
+    {
+        return CustomFieldGroup::where('id', $id)->update($request);
+    }
+
+    public function find($id)
+    {
+        return CustomFieldGroup::find($id);
+    }
+
+    public function deleteByGroupOrType($column,$value)
+    {
+        return CustomFieldGroup::where($column, $value)->delete();
+    }
+    
+    public function deleteCFs()
+    {
+        $CFs = new CustomFieldGroup;
+        $CFs = $CFs->where("form_type",request()->form_type);
+        if(request()->group_id) $CFs = $CFs->where("group_id",request()->group_id);
+        if(request()->wf_type_id) $CFs = $CFs->where("wf_type_id",request()->wf_type_id);
+        if(request()->status_id) $CFs = $CFs->where("status_id",request()->status_id);
+        return $CFs->delete();
+    }
+
+
+
+    public function CustomFieldsByGroup($group_id)
+    {
+        $result = CustomField::whereHas('custom_field_group', function($q) use($group_id){
+            $q->where('group_id',$group_id);
+        })->with('custom_field_group')->get();
+        return $result; 
+    }
+
+    public function CustomFieldsByWorkFlowType($workflow_type_id, $form_type)
+    {
+
+        $result = CustomField::whereHas('custom_field_by_workflow', function($q) use($workflow_type_id, $form_type){
+            $q->where('wf_type_id',$workflow_type_id)->where('form_type',$form_type);
+        })->with(["custom_field_by_workflow" => function($q) use($workflow_type_id, $form_type){
+            $q->where('wf_type_id',$workflow_type_id)->where('form_type',$form_type);
+        }])->get();
+        return $result; 
+    }
+
+    public function CustomFieldsByWorkFlowTypeAndStatus($workflow_type_id, $form_type, $status_id)
+    {
+        
+        $result = CustomField::whereHas('custom_field_by_workflow', function($q) use($workflow_type_id, $form_type,$status_id){
+            $q->where('wf_type_id',$workflow_type_id)->where('form_type',$form_type)->where(function($query) use($status_id) {
+                $query->where('status_id' , $status_id)->orWhereNULL('status_id');
+            });
+        })->with(["custom_field_by_workflow" => function($q) use($workflow_type_id, $form_type,$status_id){
+            $q->where('wf_type_id',$workflow_type_id)->where('form_type',$form_type)->where(function($query) use($status_id) {
+                $query->where('status_id' , $status_id)->orWhereNULL('status_id');
+            });
+        }])->get();
+        //})->with('custom_field_by_workflow')->get();
+        return $result; 
+    }
+
+    public function CustomFieldsByWorkFlowTypeViewPage($workflow_type_id, $form_type,$groupId)
+    {
+         
+        $result = CustomField::whereHas('custom_field_by_workflow', function($q) use($workflow_type_id, $form_type, $groupId){
+            $q->where('wf_type_id',$workflow_type_id)->where('form_type',$form_type)->where(function($query) use($groupId) {
+                $query->where('group_id', $groupId)->orWhereNULL('group_id');
+            });
+        })->with('custom_field_by_workflow')->get();
+        
+        return $result; 
+    }
+
+
+    public function AllCustomFieldsSelected()
+    {
+        $result = CustomField::with(['custom_field_group' => function($q){
+                $q->where("form_type",request()->form_type); 
+                $q->where("wf_type_id",request()->wf_type_id); 
+                if(request()->group_id)
+                {
+                    $q->where("group_id",request()->group_id);
+                } 
+                else 
+                {
+                    $q->WhereNULL('group_id');
+                }  
+                if(request()->status_id) 
+                {
+                    $q->where("status_id",request()->status_id); 
+                }
+                else 
+                {
+                    $q->WhereNULL('status_id');
+                }  
+            }])->get();
+        return $result;    
+        //return CustomField::with('custom_field_group')->get();
+    }
+    
+
+    public function CustomFieldsByFormType($form_type)
+    {
+        $result = CustomField::whereHas('custom_field_group', function($q) use($form_type){
+            $q->where('form_type',$form_type);
+        })->with('custom_field_group')->get();
+        return $result; 
+    }
+
+
+    public function getAllCustomFieldsWithSelectedByformType($column,$value)
+    {
+        $result = CustomField::whereHas('custom_field_group', function($q) use($column,$value){
+            $q->where($column,$value); 
+        })->with('custom_field_group')->get();
+        return $result; 
+       
+    }
+
+    
+		
+    
+}

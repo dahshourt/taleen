@@ -1,0 +1,207 @@
+Roles:
+------
+
+Super Admin // this role have all the permissions no need to assign any permission to it
+
+// Add any other roles and assign permissions to them.
+
+
+Permissions:
+------------
+
+Users Permissions:
+
+-List Users
+-Create User
+-Edit User
+-Show User
+-Delete User
+-Active User
+-Set Time For Another User
+
+Module name: 'User Permissions'
+
+.........................
+
+Statuses Permissions:
+
+-List Statuses
+-Create Status
+-Edit Status
+-Show Status
+-Delete Status
+-Active Status
+
+Module name: 'Status Permissions'
+
+..........................
+
+WorkFlows Permissions:
+
+-List Workflows
+-Create Workflow
+-Edit Workflow
+-Show Workflow
+-Delete Workflow
+-Active Workflow
+
+Module name: 'Workflow Permissions'
+
+...........................
+
+Division Manager Permissions:
+
+-List Division
+-Create Division 
+-Edit Division 
+-Show Division
+-Delete Division
+-Active Division
+
+Module name: 'Division Manager Permissions'
+
+............................
+
+Groups Permissions:
+
+-List Groups
+-Create Group
+-Edit Group
+-Show Group
+-Delete Group
+-Active Group
+
+Module name: 'Group Permissions'
+
+.............................
+
+My Assignment Permission:
+
+-My Assignments
+
+Module name: 'My Assignment Permissions'
+
+.............................
+
+Roles Permissions
+
+-List Roles
+-Create Role
+-Edit Role
+-Show Role
+-Delete Role
+
+Module name: 'Role Permissions'
+
+...........................
+*note the permissions will be removed from the database no and no one has access to add, edit or delete permissions except the dev team
+
+Permissions for Permissions:
+
+-List Permissions
+-Create Permission
+-Edit Permission
+-Show Permission
+-Delete Permission
+
+Module name: 'Permissions'
+
+............................
+
+Stages Permissions:
+
+-List Stages
+-Create Stage
+-Edit Stage
+-Show Stage
+-Delete Stage
+-Active Stage
+
+Module name: 'Stages Permissions'
+
+.............................
+
+Parents Permissions:
+
+-List Parents
+-Create Parent
+-Edit Parent
+-Show Parent
+-Delete Parent
+-Active Parent
+
+Module name: Parent Permissions
+
+.............................
+
+HighLevelStatuses Permissions:
+
+-List HighLevelStatuses
+-Create HighLevelStatus
+-Edit HighLevelStatus
+-Show HighLevelStatus
+-Delete HighLevelStatus
+-Active HighLevelStatus
+
+Module name: 'HighLevelStatus Permissions'
+
+.............................
+
+RejectionReasons Permissions:
+
+-List RejectionReasons
+-Create RejectionReason
+-Edit RejectionReason
+-Show RejectionReason
+-Delete RejectionReason
+-Active RejectionReason
+
+Module name: 'RejectionReason Permissions'
+
+..............................
+
+ChangeRequests Permissions:
+
+-List ChangeRequests
+-Create ChangeRequest
+-Edit ChangeRequest
+-Show ChangeRequest
+-Delete ChangeRequest
+-Active ChangeRequest
+
+Module name: 'ChangeRequests'
+
+...............................
+
+CustomFields Permissions:
+
+-Access CustomFields
+
+Module name: 'CustomFields'
+
+
+................................
+
+Search Permissions:
+
+-Access Search
+
+Module name: 'Search'
+
+.................................
+
+
+Advanced Search Permissions:
+
+-Access Advanced Search
+
+Module name: 'Advanced Search'
+
+
+..................................
+
+Supervisor Permissions:
+
+-Set Time For Another User
+
+Module name: Supervisors

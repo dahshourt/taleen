@@ -1,0 +1,374 @@
+/* Premium Card Styling */
+.card.card-custom {
+    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.05);
+    border: 0;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.card-header {
+    background-color: #fff;
+    border-bottom: 1px solid #ebedf3;
+    padding: 2rem 2.25rem;
+}
+
+.card-title {
+    font-weight: 600;
+    color: #3f4254;
+    font-size: 1.25rem;
+}
+
+/* Enhanced Section Headers */
+.crt-section-header {
+    display: flex;
+    align-items: center;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid transparent;
+}
+
+.crt-section-header.editable {
+    border-bottom-color: #3699FF;
+    /* Metronic Primary Blue */
+}
+
+.crt-section-header.readonly {
+    border-bottom-color: #E4E6EF;
+    /* Metronic Light Gray */
+}
+
+.crt-header-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    margin-right: 12px;
+}
+
+.crt-header-icon.editable {
+    background-color: rgba(54, 153, 255, 0.1);
+    color: #3699FF;
+}
+
+.crt-header-icon.readonly {
+    background-color: rgba(181, 181, 195, 0.1);
+    color: #B5B5C3;
+}
+
+.crt-header-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Section Containers */
+.crt-section-container {
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    transition: all 0.3s ease;
+}
+
+.crt-section-container.editable {
+    background-color: #ffffff;
+    border: 1px solid #ebedf3;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.01);
+}
+
+.crt-section-container.readonly {
+    background-color: #f9f9f9;
+    /* Very light gray */
+    border: 1px solid #f0f0f0;
+}
+
+/* Form Control Enhancements */
+.form-control {
+    border-radius: 6px;
+    border-color: #E4E6EF;
+    height: 48px;
+    /* Slightly taller inputs */
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+}
+
+.form-control:focus {
+    border-color: #3699FF;
+    box-shadow: 0 0 0 0.2rem rgba(54, 153, 255, 0.1);
+}
+
+.form-control:disabled,
+.form-control[readonly] {
+    background-color: #ebedf3;
+    opacity: 1;
+    border-color: transparent;
+    color: #7E8299;
+}
+
+label {
+    font-weight: 500;
+    color: #3F4254;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+/* Submit Button Enhancement */
+#submit_button {
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(27, 197, 189, 0.2);
+    /* Metronic Success Color Shadow */
+    border-radius: 8px;
+    transition: transform 0.2s;
+}
+
+#submit_button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(27, 197, 189, 0.3);
+}
+
+/* Custom Checkbox Redesign */
+.crt-checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    background-color: #f8f9fb;
+    border: 1px solid #ebedf3;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 0.5rem;
+}
+
+.crt-checkbox-wrapper:hover:not(.disabled) {
+    background-color: #fff;
+    border-color: #3699FF;
+    box-shadow: 0 2px 8px rgba(54, 153, 255, 0.1);
+}
+
+.crt-checkbox-wrapper.checked {
+    background-color: #f0f7ff;
+    border-color: #3699FF;
+}
+
+.crt-checkbox-wrapper.disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    background-color: #ebedf3;
+}
+
+.crt-custom-checkbox {
+    position: relative;
+    width: 24px;
+    height: 24px;
+    border: 2px solid #b5b5c3;
+    border-radius: 6px;
+    margin-right: 12px;
+    transition: all 0.2s;
+    background-color: #fff;
+    flex-shrink: 0;
+}
+
+/* When the real checkbox is checked, style the custom one */
+input[type="checkbox"]:checked+.crt-custom-checkbox {
+    background-color: #3699FF;
+    border-color: #3699FF;
+}
+
+input[type="checkbox"]:checked+.crt-custom-checkbox::after {
+    content: "";
+    position: absolute;
+    left: 7px;
+    top: 3px;
+    width: 6px;
+    height: 12px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.crt-checkbox-label {
+    font-weight: 500;
+    font-size: 1rem;
+    color: #3F4254;
+    margin: 0;
+    cursor: inherit;
+}
+
+/* Custom File Input Redesign */
+.crt-file-upload-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background-color: #f8f9fb;
+    border: 2px dashed #b5b5c3;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    text-align: center;
+    cursor: pointer;
+}
+
+.crt-file-upload-wrapper:hover:not(.disabled) {
+    border-color: #3699FF;
+    background-color: #e8f0ff;
+}
+
+.crt-file-upload-wrapper.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: #ebedf3;
+    border-style: solid;
+    border-color: #ebedf3;
+}
+
+.crt-file-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.crt-file-input:disabled {
+    cursor: not-allowed;
+}
+
+.crt-file-content {
+    pointer-events: none;
+    z-index: 1;
+}
+
+.crt-file-icon {
+    font-size: 2rem;
+    color: #3699FF;
+    margin-bottom: 0.5rem;
+}
+
+.crt-file-upload-wrapper.disabled .crt-file-icon {
+    color: #b5b5c3;
+}
+
+.crt-file-label {
+    font-weight: 600;
+    color: #3F4254;
+    margin-bottom: 0.25rem;
+}
+
+.crt-file-hint {
+    color: #B5B5C3;
+    font-size: 0.85rem;
+}
+
+.crt-file-name-display {
+    font-size: 0.9rem;
+    color: #3699FF;
+    margin-top: 0.5rem;
+    font-weight: 500;
+    word-break: break-all;
+}
+
+/* Custom Fields Configuration Form Redesign */
+.crt-config-item {
+    background-color: #ffffff;
+    border: 1px solid #ebedf3;
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+    transition: all 0.2s ease;
+}
+
+.crt-config-item:hover {
+    border-color: #3699FF;
+    box-shadow: 0 4px 12px rgba(54, 153, 255, 0.08);
+}
+
+.crt-config-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* Toggle Switch */
+.crt-config-toggle {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+}
+
+.crt-config-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.crt-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ebedf3;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.crt-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.crt-config-toggle input:checked+.crt-slider {
+    background-color: #3699FF;
+}
+
+.crt-config-toggle input:checked+.crt-slider:before {
+    transform: translateX(24px);
+}
+
+.crt-config-label {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #3F4254;
+    cursor: pointer;
+}
+
+.crt-config-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #f3f6f9;
+    margin-top: 0.5rem;
+}
+
+.crt-control-group {
+    flex: 1;
+    min-width: 200px;
+}
+
+.crt-control-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #B5B5C3;
+    margin-bottom: 0.25rem;
+    display: block;
+}
