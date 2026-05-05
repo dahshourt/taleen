@@ -8,35 +8,30 @@ use Illuminate\Support\Facades\Log;
 /**
  * ChangeRequestStatusService
  *
- * Handles status transitions for Change Requests, including group assignment
- * resolution (with special-case overrides via ChangeRequestGroupAssignmentService).
+ * Handles CR status transitions and group-assignment resolution.
+ * No database schema changes are required — all override logic is
+ * derived from existing workflow / status / group data.
  */
 class ChangeRequestStatusService
 {
-    /**
-     * @var ChangeRequestGroupAssignmentService
-     */
     protected ChangeRequestGroupAssignmentService $groupAssignmentService;
 
-    public function __construct(
-        ChangeRequestGroupAssignmentService $groupAssignmentService
-    ) {
+    public function __construct(ChangeRequestGroupAssignmentService $groupAssignmentService)
+    {
         $this->groupAssignmentService = $groupAssignmentService;
     }
 
-    // -----------------------------------------------------------------------
-
     /**
-     * Transition a CR to $nextStatusId.
+     * Transition CR $crId from $currentStatusId to $nextStatusId.
      *
-     * Resolves the assigned group by:
-     *   1. Checking for a special-case override (e.g. In-House + app_support).
-     *   2. Falling back to the default group_statuses lookup.
+     * Group resolution order:
+     *   1. Special-case override  (ChangeRequestGroupAssignmentService)
+     *   2. Default: group_statuses lookup  (type = 1 = primary assignee)
      *
-     * @param  int      $crId
-     * @param  int      $currentStatusId
-     * @param  int      $nextStatusId
-     * @param  int      $actingUserId
+     * @param  int   $crId
+     * @param  int   $currentStatusId
+     * @param  int   $nextStatusId
+     * @param  int   $actingUserId
      * @return bool
      */
     public function transitionStatus(
@@ -47,29 +42,16 @@ class ChangeRequestStatusService
     ): bool {
         DB::beginTransaction();
         try {
-            // ----------------------------------------------------------------
-            // 1. Resolve the group to assign
-            // ----------------------------------------------------------------
-            $groupId = $this->resolveAssignedGroup(
-                $crId,
-                $currentStatusId,
-                $nextStatusId
-            );
+            // 1. Resolve group (override or default — pure code, no extra columns)
+            $groupId = $this->resolveAssignedGroup($crId, $currentStatusId, $nextStatusId);
 
-            // ----------------------------------------------------------------
             // 2. Deactivate current active status record
-            // ----------------------------------------------------------------
             DB::table('change_request_statuses')
                 ->where('cr_id', $crId)
                 ->where('active', '1')
-                ->update([
-                    'active'     => '0',
-                    'updated_at' => now(),
-                ]);
+                ->update(['active' => '0', 'updated_at' => now()]);
 
-            // ----------------------------------------------------------------
             // 3. Insert new status record
-            // ----------------------------------------------------------------
             DB::table('change_request_statuses')->insert([
                 'cr_id'              => $crId,
                 'old_status_id'      => $currentStatusId,
@@ -83,32 +65,22 @@ class ChangeRequestStatusService
                 'updated_at'         => now(),
             ]);
 
-            // ----------------------------------------------------------------
-            // 4. Update the CR's current group and status
-            // ----------------------------------------------------------------
-            $updatePayload = [
-                'status_id'  => $nextStatusId,
-                'updated_at' => now(),
-            ];
-
+            // 4. Update CR row (status + optionally group)
+            $updatePayload = ['status_id' => $nextStatusId, 'updated_at' => now()];
             if ($groupId !== null) {
                 $updatePayload['group_id'] = $groupId;
             }
+            DB::table('change_request')->where('id', $crId)->update($updatePayload);
 
-            DB::table('change_request')
-                ->where('id', $crId)
-                ->update($updatePayload);
-
-            // ----------------------------------------------------------------
-            // 5. Log the transition
-            // ----------------------------------------------------------------
+            // 5. Log
             $groupName = $groupId
                 ? DB::table('groups')->where('id', $groupId)->value('name')
                 : 'unchanged';
 
             Log::info(
-                "[StatusTransition] CR #{$crId}: status {$currentStatusId} "
-                . "→ {$nextStatusId}, group assigned: {$groupName} (id={$groupId})."
+                "[StatusTransition] CR #{$crId}: "
+                . "{$currentStatusId} -> {$nextStatusId}, "
+                . "group: {$groupName} (id={$groupId})."
             );
 
             DB::commit();
@@ -117,25 +89,15 @@ class ChangeRequestStatusService
         } catch (\Throwable $e) {
             DB::rollBack();
             Log::error(
-                '[StatusTransition] Failed for CR #' . $crId . ': '
-                . $e->getMessage(),
+                '[StatusTransition] Failed for CR #' . $crId . ': ' . $e->getMessage(),
                 ['exception' => $e]
             );
             return false;
         }
     }
 
-    // -----------------------------------------------------------------------
-    // Internal helpers
-    // -----------------------------------------------------------------------
-
     /**
-     * Determine which group_id should be assigned for the given transition.
-     *
-     * Priority order:
-     *   1. Special-case override (ChangeRequestGroupAssignmentService)
-     *   2. Default: first group linked to $nextStatusId in group_statuses
-     *      where type = 1 (primary assignee)
+     * Determine which group_id to assign for this transition.
      *
      * @param  int   $crId
      * @param  int   $currentStatusId
@@ -147,7 +109,7 @@ class ChangeRequestStatusService
         int $currentStatusId,
         int $nextStatusId
     ): ?int {
-        // --- 1. Special-case override ---
+        // Priority 1: special-case override (code-only, no DB flag)
         $overrideGroupId = $this->groupAssignmentService->resolveGroupOverride(
             $crId,
             $currentStatusId,
@@ -158,10 +120,10 @@ class ChangeRequestStatusService
             return $overrideGroupId;
         }
 
-        // --- 2. Default lookup from group_statuses ---
+        // Priority 2: default — look up primary group for the target status
         $defaultGroupId = DB::table('group_statuses')
             ->where('status_id', $nextStatusId)
-            ->where('type', 1)        // type 1 = primary assignee
+            ->where('type', 1)
             ->value('group_id');
 
         return $defaultGroupId ? (int) $defaultGroupId : null;
